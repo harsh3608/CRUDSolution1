@@ -1,0 +1,19 @@
+﻿using ServiceContracts;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Tests
+{
+    public class CountriesServiceTest
+    {
+        private readonly ICountriesService _countriesService;
+
+        public CountriesServiceTest(ICountriesService countriesService)
+        {
+            _countriesService = countriesService;
+        }
+    }
+}
