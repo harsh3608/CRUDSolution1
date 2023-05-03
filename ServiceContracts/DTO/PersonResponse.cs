@@ -47,6 +47,19 @@ namespace ServiceContracts.DTO
         {
             return base.GetHashCode();
         }
+
+        public override string ToString()
+        {
+            return 
+                $"Person ID:{PersonID}, " +
+                $"Person Name:{PersonName}, " +
+                $"Email:{Email}, " +
+                $"Date of Birth: {DateOfBirth?.ToString("dd-MMM-yyyy")}, " +
+                $"Gender:{Gender}, Country ID:{CountryID}, " +
+                $"Country Name:{Country}, " +
+                $"Address:{Address}, " +
+                $"Receive News Letters:{ReceiveNewsLetters} ";
+        }
     }
 
     public static class PersonExtensions
@@ -68,7 +81,7 @@ namespace ServiceContracts.DTO
                 CountryID = person.CountryID,
                 Address = person.Address,
                 ReceiveNewsLetters = person.ReceiveNewsLetters,
-                Age = (person.DateOfBirth != null) ? Math.Round((DateTime.Now - person.DateOfBirth.Value).TotalDays / 365.25): null
+                Age = (person.DateOfBirth != null) ? Math.Round((DateTime.Now - person.DateOfBirth.Value).TotalDays / 365.25) : null
             };
         }
     }
