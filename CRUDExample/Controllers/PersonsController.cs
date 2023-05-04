@@ -9,11 +9,13 @@ namespace CRUDExample.Controllers
     {
         // Private Fields
         private readonly IPersonsService _personsService;
+        private readonly ICountriesService _countriesService;
 
         // Constructor
-        public PersonsController(IPersonsService personsService)
+        public PersonsController(IPersonsService personsService, ICountriesService countriesService)
         {
             _personsService = personsService;
+            _countriesService = countriesService;
         }
 
 
@@ -48,5 +50,19 @@ namespace CRUDExample.Controllers
 
             return View(sortedPersons); //Views/Persons/Index.cshtml
         }
+
+        // Executes when the user clicks on "Create Person" hyperlink
+        // (while opening create view)
+        [Route("persons/create")]
+        [HttpGet]
+        public IActionResult Create()
+        {
+            List<CountryResponse> countries = _countriesService.GetAllCountries();
+            ViewBag.Countries = countries;
+            return View();
+        }
+
+
+
     }
 }
