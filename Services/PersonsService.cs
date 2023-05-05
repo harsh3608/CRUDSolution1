@@ -1,9 +1,10 @@
-﻿using Entities;
-using ServiceContracts;
+﻿using System;
+using Entities;
 using ServiceContracts.DTO;
-using ServiceContracts.Enums;
+using ServiceContracts;
+using System.ComponentModel.DataAnnotations;
 using Services.Helpers;
-using System.Diagnostics;
+using ServiceContracts.Enums;
 
 namespace Services
 {
@@ -18,6 +19,7 @@ namespace Services
         {
             _persons = new List<Person>();
             _countriesService = new CountriesService();
+
             if (initialize)
             {
                 _persons.Add(new Person() { PersonID = Guid.Parse("8082ED0C-396D-4162-AD1D-29A13F929824"), PersonName = "Aguste", Email = "aleddy0@booking.com", DateOfBirth = DateTime.Parse("1993-01-02"), Gender = "Male", Address = "0858 Novick Terrace", ReceiveNewsLetters = false, CountryID = Guid.Parse("000C76EB-62E9-4465-96D1-2C41FDB64C3B") });
@@ -43,52 +45,55 @@ namespace Services
             }
         }
 
+
         private PersonResponse ConvertPersonToPersonResponse(Person person)
         {
-            // convert the person object to PersonResponse type
             PersonResponse personResponse = person.ToPersonResponse();
             personResponse.Country = _countriesService.GetCountryByCountryID(person.CountryID)?.CountryName;
             return personResponse;
         }
 
-        public PersonResponse AddPerson(PersonAddRequest personAddRequest)
+        public PersonResponse AddPerson(PersonAddRequest? personAddRequest)
         {
-            // check if personAddRequest is not null.
+            //check if PersonAddRequest is not null
             if (personAddRequest == null)
             {
                 throw new ArgumentNullException(nameof(personAddRequest));
             }
 
-            // Model Validation
+            //Model validation
             ValidationHelper.ModelValidation(personAddRequest);
 
-            // convert personAddRequest to Person type
+            //convert personAddRequest into Person type
             Person person = personAddRequest.ToPerson();
 
-            // generate PersonID
+            //generate PersonID
             person.PersonID = Guid.NewGuid();
 
-            // add person object to persons list
+            //add person object to persons list
             _persons.Add(person);
 
-            // convert the person object to PersonResponse type
+            //convert the Person object into PersonResponse type
             return ConvertPersonToPersonResponse(person);
         }
+
 
         public List<PersonResponse> GetAllPersons()
         {
-            return _persons.Select(temp => ConvertPersonToPersonResponse(temp) ).ToList();
+            return _persons.Select(temp => ConvertPersonToPersonResponse(temp)).ToList();
         }
 
-        public PersonResponse? GetPersonByPersonID(Guid? PersonID)
-        {
-            if (PersonID == null) return null;
 
-            Person? person = _persons.FirstOrDefault(temp => temp.PersonID == PersonID);
-            if (person == null) return null;
+        public PersonResponse? GetPersonByPersonID(Guid? personID)
+        {
+            if (personID == null)
+                return null;
+
+            Person? person = _persons.FirstOrDefault(temp => temp.PersonID == personID);
+            if (person == null)
+                return null;
 
             return ConvertPersonToPersonResponse(person);
-
         }
 
         public List<PersonResponse> GetFilteredPersons(string searchBy, string? searchString)
@@ -144,9 +149,11 @@ namespace Services
             return matchingPersons;
         }
 
+
         public List<PersonResponse> GetSortedPersons(List<PersonResponse> allPersons, string sortBy, SortOrderOptions sortOrder)
         {
-            if (string.IsNullOrEmpty(sortBy)) return allPersons;
+            if (string.IsNullOrEmpty(sortBy))
+                return allPersons;
 
             List<PersonResponse> sortedPersons = (sortBy, sortOrder) switch
             {
@@ -166,6 +173,10 @@ namespace Services
 
                 (nameof(PersonResponse.Age), SortOrderOptions.DESC) => allPersons.OrderByDescending(temp => temp.Age).ToList(),
 
+                (nameof(PersonResponse.Gender), SortOrderOptions.ASC) => allPersons.OrderBy(temp => temp.Gender, StringComparer.OrdinalIgnoreCase).ToList(),
+
+                (nameof(PersonResponse.Gender), SortOrderOptions.DESC) => allPersons.OrderByDescending(temp => temp.Gender, StringComparer.OrdinalIgnoreCase).ToList(),
+
                 (nameof(PersonResponse.Country), SortOrderOptions.ASC) => allPersons.OrderBy(temp => temp.Country, StringComparer.OrdinalIgnoreCase).ToList(),
 
                 (nameof(PersonResponse.Country), SortOrderOptions.DESC) => allPersons.OrderByDescending(temp => temp.Country, StringComparer.OrdinalIgnoreCase).ToList(),
@@ -178,25 +189,26 @@ namespace Services
 
                 (nameof(PersonResponse.ReceiveNewsLetters), SortOrderOptions.DESC) => allPersons.OrderByDescending(temp => temp.ReceiveNewsLetters).ToList(),
 
-                //Default Case
                 _ => allPersons
             };
 
             return sortedPersons;
         }
 
+
         public PersonResponse UpdatePerson(PersonUpdateRequest? personUpdateRequest)
         {
-            if (personUpdateRequest == null) throw new ArgumentNullException(nameof(Person));
+            if (personUpdateRequest == null)
+                throw new ArgumentNullException(nameof(Person));
 
-            //Validation
+            //validation
             ValidationHelper.ModelValidation(personUpdateRequest);
 
             //get matching person object to update
             Person? matchingPerson = _persons.FirstOrDefault(temp => temp.PersonID == personUpdateRequest.PersonID);
-            if(matchingPerson == null) 
+            if (matchingPerson == null)
             {
-                throw new ArgumentException("Given Person ID doesn't exist !");
+                throw new ArgumentException("Given person id doesn't exist");
             }
 
             //update all details
@@ -213,12 +225,17 @@ namespace Services
 
         public bool DeletePerson(Guid? personID)
         {
-            if (personID == null) throw new ArgumentNullException(nameof(personID));
+            if (personID == null)
+            {
+                throw new ArgumentNullException(nameof(personID));
+            }
 
             Person? person = _persons.FirstOrDefault(temp => temp.PersonID == personID);
-            if (person == null) return false;
+            if (person == null)
+                return false;
 
-            _persons.RemoveAll(temp=> temp.PersonID == personID);
+            _persons.RemoveAll(temp => temp.PersonID == personID);
+
             return true;
         }
     }
