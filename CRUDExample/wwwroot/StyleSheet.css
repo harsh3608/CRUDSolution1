@@ -386,10 +386,9 @@ a.link-hover:hover
     background-color: #066627;
 }
 
-.button-red-back
-{
+.button-red-back {
     background-color: #cb511e;
-    color: #ffffff;
+    color: #fa0505;
     border: 2px solid #e49776;
 }
 
@@ -421,6 +420,10 @@ a.link-hover:hover
     display: inline-block;
 }
 
+.center-box {
+    margin: auto;
+    width: 90%;
+}
 
 
 
