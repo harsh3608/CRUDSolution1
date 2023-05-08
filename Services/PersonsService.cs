@@ -48,6 +48,7 @@ namespace Services
             //add person object to persons list
             _db.Persons.Add(person);
             _db.SaveChanges();
+            //_db.sp_InsertPerson(person);
 
             //convert the Person object into PersonResponse type
             return ConvertPersonToPersonResponse(person);
@@ -59,6 +60,9 @@ namespace Services
             //SELECT * from Persons
             return _db.Persons.ToList()
               .Select(temp => ConvertPersonToPersonResponse(temp)).ToList();
+
+            //return _db.sp_GetAllPersons()
+            //  .Select(temp => ConvertPersonToPersonResponse(temp)).ToList();
         }
 
 
@@ -74,6 +78,7 @@ namespace Services
 
             return ConvertPersonToPersonResponse(person);
         }
+
 
         public List<PersonResponse> GetFilteredPersons(string searchBy, string? searchString)
         {

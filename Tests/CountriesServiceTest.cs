@@ -1,22 +1,25 @@
-﻿using ServiceContracts;
+﻿using System;
+using System.Collections.Generic;
+using Entities;
 using ServiceContracts.DTO;
+using ServiceContracts;
 using Services;
+using Xunit;
+using Microsoft.EntityFrameworkCore;
 
-namespace Tests
+namespace CRUDTests
 {
     public class CountriesServiceTest
     {
         private readonly ICountriesService _countriesService;
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
+        //constructor
         public CountriesServiceTest()
         {
-            _countriesService = new CountriesService(false);
+            _countriesService = new CountriesService(new PersonsDbContext(new DbContextOptionsBuilder<PersonsDbContext>().Options));
         }
 
-        #region AddCountry 
+        #region AddCountry
         //When CountryAddRequest is null, it should throw ArgumentNullException
         [Fact]
         public void AddCountry_NullCountry()
@@ -75,11 +78,15 @@ namespace Tests
 
             //Act
             CountryResponse response = _countriesService.AddCountry(request);
+            List<CountryResponse> countries_from_GetAllCountries = _countriesService.GetAllCountries();
 
             //Assert
             Assert.True(response.CountryID != Guid.Empty);
+            Assert.Contains(response, countries_from_GetAllCountries);
         }
+
         #endregion
+
 
         #region GetAllCountries
 
@@ -99,9 +106,9 @@ namespace Tests
         {
             //Arrange
             List<CountryAddRequest> country_request_list = new List<CountryAddRequest>() {
-               new CountryAddRequest() { CountryName = "USA" },
-               new CountryAddRequest() { CountryName = "UK" }
-            };
+        new CountryAddRequest() { CountryName = "USA" },
+        new CountryAddRequest() { CountryName = "UK" }
+      };
 
             //Act
             List<CountryResponse> countries_list_from_add_country = new List<CountryResponse>();
@@ -121,6 +128,7 @@ namespace Tests
         }
         #endregion
 
+
         #region GetCountryByCountryID
 
         [Fact]
@@ -128,11 +136,10 @@ namespace Tests
         public void GetCountryByCountryID_NullCountryID()
         {
             //Arrange
-            Guid? countryID = Guid.Empty;
-            
+            Guid? countrID = null;
 
             //Act
-            CountryResponse? country_response_from_get_method = _countriesService.GetCountryByCountryID((Guid)countryID);
+            CountryResponse? country_response_from_get_method = _countriesService.GetCountryByCountryID(countrID);
 
 
             //Assert
@@ -155,6 +162,5 @@ namespace Tests
             Assert.Equal(country_response_from_add, country_response_from_get);
         }
         #endregion
-
     }
 }

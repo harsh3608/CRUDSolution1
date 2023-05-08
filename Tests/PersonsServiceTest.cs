@@ -1,26 +1,32 @@
-﻿using Entities;
+﻿using System;
+using System.Collections.Generic;
+using Xunit;
 using ServiceContracts;
+using Entities;
 using ServiceContracts.DTO;
-using ServiceContracts.Enums;
 using Services;
+using ServiceContracts.Enums;
 using Xunit.Abstractions;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
-namespace Tests
+namespace CRUDTests
 {
     public class PersonsServiceTest
     {
-        //Private fields
-        private readonly IPersonsService _personsService;
+        //private fields
+        private readonly IPersonsService _personService;
         private readonly ICountriesService _countriesService;
         private readonly ITestOutputHelper _testOutputHelper;
 
         //constructor
         public PersonsServiceTest(ITestOutputHelper testOutputHelper)
         {
-            _personsService = new PersonsService();
-            _countriesService = new CountriesService();
-            _testOutputHelper = testOutputHelper;
+            _countriesService = new CountriesService(new PersonsDbContext(new DbContextOptionsBuilder<PersonsDbContext>().Options));
 
+            _personService = new PersonsService(new PersonsDbContext(new DbContextOptionsBuilder<PersonsDbContext>().Options), _countriesService);
+
+            _testOutputHelper = testOutputHelper;
         }
 
         #region AddPerson
@@ -35,7 +41,7 @@ namespace Tests
             //Act
             Assert.Throws<ArgumentNullException>(() =>
             {
-                _personsService.AddPerson(personAddRequest);
+                _personService.AddPerson(personAddRequest);
             });
         }
 
@@ -50,7 +56,7 @@ namespace Tests
             //Act
             Assert.Throws<ArgumentException>(() =>
             {
-                _personsService.AddPerson(personAddRequest);
+                _personService.AddPerson(personAddRequest);
             });
         }
 
@@ -62,9 +68,9 @@ namespace Tests
             PersonAddRequest? personAddRequest = new PersonAddRequest() { PersonName = "Person name...", Email = "person@example.com", Address = "sample address", CountryID = Guid.NewGuid(), Gender = GenderOptions.Male, DateOfBirth = DateTime.Parse("2000-01-01"), ReceiveNewsLetters = true };
 
             //Act
-            PersonResponse person_response_from_add = _personsService.AddPerson(personAddRequest);
+            PersonResponse person_response_from_add = _personService.AddPerson(personAddRequest);
 
-            List<PersonResponse> persons_list = _personsService.GetAllPersons();
+            List<PersonResponse> persons_list = _personService.GetAllPersons();
 
             //Assert
             Assert.True(person_response_from_add.PersonID != Guid.Empty);
@@ -85,7 +91,7 @@ namespace Tests
             Guid? personID = null;
 
             //Act
-            PersonResponse? person_response_from_get = _personsService.GetPersonByPersonID(personID);
+            PersonResponse? person_response_from_get = _personService.GetPersonByPersonID(personID);
 
             //Assert
             Assert.Null(person_response_from_get);
@@ -102,9 +108,9 @@ namespace Tests
 
             PersonAddRequest person_request = new PersonAddRequest() { PersonName = "person name...", Email = "email@sample.com", Address = "address", CountryID = country_response.CountryID, DateOfBirth = DateTime.Parse("2000-01-01"), Gender = GenderOptions.Male, ReceiveNewsLetters = false };
 
-            PersonResponse person_response_from_add = _personsService.AddPerson(person_request);
+            PersonResponse person_response_from_add = _personService.AddPerson(person_request);
 
-            PersonResponse? person_response_from_get = _personsService.GetPersonByPersonID(person_response_from_add.PersonID);
+            PersonResponse? person_response_from_get = _personService.GetPersonByPersonID(person_response_from_add.PersonID);
 
             //Assert
             Assert.Equal(person_response_from_add, person_response_from_get);
@@ -120,7 +126,7 @@ namespace Tests
         public void GetAllPersons_EmptyList()
         {
             //Act
-            List<PersonResponse> persons_from_get = _personsService.GetAllPersons();
+            List<PersonResponse> persons_from_get = _personService.GetAllPersons();
 
             //Assert
             Assert.Empty(persons_from_get);
@@ -150,7 +156,7 @@ namespace Tests
 
             foreach (PersonAddRequest person_request in person_requests)
             {
-                PersonResponse person_response = _personsService.AddPerson(person_request);
+                PersonResponse person_response = _personService.AddPerson(person_request);
                 person_response_list_from_add.Add(person_response);
             }
 
@@ -162,7 +168,7 @@ namespace Tests
             }
 
             //Act
-            List<PersonResponse> persons_list_from_get = _personsService.GetAllPersons();
+            List<PersonResponse> persons_list_from_get = _personService.GetAllPersons();
 
             //print persons_list_from_get
             _testOutputHelper.WriteLine("Actual:");
@@ -205,7 +211,7 @@ namespace Tests
 
             foreach (PersonAddRequest person_request in person_requests)
             {
-                PersonResponse person_response = _personsService.AddPerson(person_request);
+                PersonResponse person_response = _personService.AddPerson(person_request);
                 person_response_list_from_add.Add(person_response);
             }
 
@@ -217,7 +223,7 @@ namespace Tests
             }
 
             //Act
-            List<PersonResponse> persons_list_from_search = _personsService.GetFilteredPersons(nameof(Person.PersonName), "");
+            List<PersonResponse> persons_list_from_search = _personService.GetFilteredPersons(nameof(Person.PersonName), "");
 
             //print persons_list_from_get
             _testOutputHelper.WriteLine("Actual:");
@@ -257,7 +263,7 @@ namespace Tests
 
             foreach (PersonAddRequest person_request in person_requests)
             {
-                PersonResponse person_response = _personsService.AddPerson(person_request);
+                PersonResponse person_response = _personService.AddPerson(person_request);
                 person_response_list_from_add.Add(person_response);
             }
 
@@ -269,7 +275,7 @@ namespace Tests
             }
 
             //Act
-            List<PersonResponse> persons_list_from_search = _personsService.GetFilteredPersons(nameof(Person.PersonName), "ma");
+            List<PersonResponse> persons_list_from_search = _personService.GetFilteredPersons(nameof(Person.PersonName), "ma");
 
             //print persons_list_from_get
             _testOutputHelper.WriteLine("Actual:");
@@ -292,6 +298,7 @@ namespace Tests
         }
 
         #endregion
+
 
         #region GetSortedPersons
 
@@ -318,7 +325,7 @@ namespace Tests
 
             foreach (PersonAddRequest person_request in person_requests)
             {
-                PersonResponse person_response = _personsService.AddPerson(person_request);
+                PersonResponse person_response = _personService.AddPerson(person_request);
                 person_response_list_from_add.Add(person_response);
             }
 
@@ -328,10 +335,10 @@ namespace Tests
             {
                 _testOutputHelper.WriteLine(person_response_from_add.ToString());
             }
-            List<PersonResponse> allPersons = _personsService.GetAllPersons();
+            List<PersonResponse> allPersons = _personService.GetAllPersons();
 
             //Act
-            List<PersonResponse> persons_list_from_sort = _personsService.GetSortedPersons(allPersons, nameof(Person.PersonName), SortOrderOptions.DESC);
+            List<PersonResponse> persons_list_from_sort = _personService.GetSortedPersons(allPersons, nameof(Person.PersonName), SortOrderOptions.DESC);
 
             //print persons_list_from_get
             _testOutputHelper.WriteLine("Actual:");
@@ -362,7 +369,7 @@ namespace Tests
             //Assert
             Assert.Throws<ArgumentNullException>(() => {
                 //Act
-                _personsService.UpdatePerson(person_update_request);
+                _personService.UpdatePerson(person_update_request);
             });
         }
 
@@ -377,7 +384,7 @@ namespace Tests
             //Assert
             Assert.Throws<ArgumentException>(() => {
                 //Act
-                _personsService.UpdatePerson(person_update_request);
+                _personService.UpdatePerson(person_update_request);
             });
         }
 
@@ -390,9 +397,9 @@ namespace Tests
             CountryAddRequest country_add_request = new CountryAddRequest() { CountryName = "UK" };
             CountryResponse country_response_from_add = _countriesService.AddCountry(country_add_request);
 
-            PersonAddRequest person_add_request = new PersonAddRequest() { PersonName = "John", CountryID = country_response_from_add.CountryID, Email = "harsh@test.com", Address = "My Address", Gender = GenderOptions.Male
-            };
-            PersonResponse person_response_from_add = _personsService.AddPerson(person_add_request);
+            PersonAddRequest person_add_request = new PersonAddRequest() { PersonName = "John", CountryID = country_response_from_add.CountryID, Email = "john@example.com", Address = "address...", Gender = GenderOptions.Male };
+
+            PersonResponse person_response_from_add = _personService.AddPerson(person_add_request);
 
             PersonUpdateRequest person_update_request = person_response_from_add.ToPersonUpdateRequest();
             person_update_request.PersonName = null;
@@ -401,7 +408,7 @@ namespace Tests
             //Assert
             Assert.Throws<ArgumentException>(() => {
                 //Act
-                _personsService.UpdatePerson(person_update_request);
+                _personService.UpdatePerson(person_update_request);
             });
 
         }
@@ -417,16 +424,16 @@ namespace Tests
 
             PersonAddRequest person_add_request = new PersonAddRequest() { PersonName = "John", CountryID = country_response_from_add.CountryID, Address = "Abc road", DateOfBirth = DateTime.Parse("2000-01-01"), Email = "abc@example.com", Gender = GenderOptions.Male, ReceiveNewsLetters = true };
 
-            PersonResponse person_response_from_add = _personsService.AddPerson(person_add_request);
+            PersonResponse person_response_from_add = _personService.AddPerson(person_add_request);
 
             PersonUpdateRequest person_update_request = person_response_from_add.ToPersonUpdateRequest();
             person_update_request.PersonName = "William";
             person_update_request.Email = "william@example.com";
 
             //Act
-            PersonResponse person_response_from_update = _personsService.UpdatePerson(person_update_request);
+            PersonResponse person_response_from_update = _personService.UpdatePerson(person_update_request);
 
-            PersonResponse? person_response_from_get = _personsService.GetPersonByPersonID(person_response_from_update.PersonID);
+            PersonResponse? person_response_from_get = _personService.GetPersonByPersonID(person_response_from_update.PersonID);
 
             //Assert
             Assert.Equal(person_response_from_get, person_response_from_update);
@@ -448,11 +455,11 @@ namespace Tests
 
             PersonAddRequest person_add_request = new PersonAddRequest() { PersonName = "Jones", Address = "address", CountryID = country_response_from_add.CountryID, DateOfBirth = Convert.ToDateTime("2010-01-01"), Email = "jones@example.com", Gender = GenderOptions.Male, ReceiveNewsLetters = true };
 
-            PersonResponse person_response_from_add = _personsService.AddPerson(person_add_request);
+            PersonResponse person_response_from_add = _personService.AddPerson(person_add_request);
 
 
             //Act
-            bool isDeleted = _personsService.DeletePerson(person_response_from_add.PersonID);
+            bool isDeleted = _personService.DeletePerson(person_response_from_add.PersonID);
 
             //Assert
             Assert.True(isDeleted);
@@ -464,14 +471,12 @@ namespace Tests
         public void DeletePerson_InvalidPersonID()
         {
             //Act
-            bool isDeleted = _personsService.DeletePerson(Guid.NewGuid());
+            bool isDeleted = _personService.DeletePerson(Guid.NewGuid());
 
             //Assert
             Assert.False(isDeleted);
         }
 
         #endregion
-
-
     }
 }
