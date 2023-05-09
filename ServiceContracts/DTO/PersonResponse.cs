@@ -1,13 +1,11 @@
-﻿using Entities;
+﻿using System;
+using Entities;
 using ServiceContracts.Enums;
-using System;
-using System.Net;
-using System.Reflection;
 
 namespace ServiceContracts.DTO
 {
     /// <summary>
-    /// Represents DTO Class that is used as return type of most methods of Persons Service
+    /// Represents DTO class that is used as return type of most methods of Persons Service
     /// </summary>
     public class PersonResponse
     {
@@ -25,8 +23,8 @@ namespace ServiceContracts.DTO
         /// <summary>
         /// Compares the current object data with the parameter object
         /// </summary>
-        /// <param name="obj"></param>
-        /// <returns>Boolean value</returns>
+        /// <param name="obj">The PersonResponse Object to compare</param>
+        /// <returns>True or false, indicating whether all person details are matched with the specified parameter object</returns>
         public override bool Equals(object? obj)
         {
             if (obj == null) return false;
@@ -34,14 +32,7 @@ namespace ServiceContracts.DTO
             if (obj.GetType() != typeof(PersonResponse)) return false;
 
             PersonResponse person = (PersonResponse)obj;
-            return PersonID == person.PersonID &&
-                PersonName == person.PersonName &&
-                Email == person.Email &&
-                DateOfBirth == person.DateOfBirth &&
-                Gender == person.Gender &&
-                CountryID == person.CountryID &&
-                Address == person.Address &&
-                ReceiveNewsLetters == person.ReceiveNewsLetters;
+            return PersonID == person.PersonID && PersonName == person.PersonName && Email == person.Email && DateOfBirth == person.DateOfBirth && Gender == person.Gender && CountryID == person.CountryID && Address == person.Address && ReceiveNewsLetters == person.ReceiveNewsLetters;
         }
 
         public override int GetHashCode()
@@ -51,30 +42,12 @@ namespace ServiceContracts.DTO
 
         public override string ToString()
         {
-            return 
-                $"Person ID:{PersonID}, " +
-                $"Person Name:{PersonName}, " +
-                $"Email:{Email}, " +
-                $"Date of Birth: {DateOfBirth?.ToString("dd-MMM-yyyy")}, " +
-                $"Gender:{Gender}, Country ID:{CountryID}, " +
-                $"Country Name:{Country}, " +
-                $"Address:{Address}, " +
-                $"Receive News Letters:{ReceiveNewsLetters} ";
+            return $"Person ID: {PersonID}, Person Name: {PersonName}, Email: {Email}, Date of Birth: {DateOfBirth?.ToString("dd MMM yyyy")}, Gender: {Gender}, Country ID: {CountryID}, Country: {Country}, Address: {Address}, Receive News Letters: {ReceiveNewsLetters}";
         }
 
         public PersonUpdateRequest ToPersonUpdateRequest()
         {
-            return new PersonUpdateRequest()
-            {
-                PersonID = PersonID,
-                PersonName = PersonName,
-                Email = Email,
-                DateOfBirth = DateOfBirth,
-                Gender = (GenderOptions?)Enum.Parse(typeof(GenderOptions),Gender, true),
-                Address = Address,
-                CountryID = (Guid)CountryID,
-                ReceiveNewsLetters = ReceiveNewsLetters,
-            };
+            return new PersonUpdateRequest() { PersonID = PersonID, PersonName = PersonName, Email = Email, DateOfBirth = DateOfBirth, Gender = (GenderOptions)Enum.Parse(typeof(GenderOptions), Gender, true), Address = Address, CountryID = (Guid)CountryID, ReceiveNewsLetters = ReceiveNewsLetters };
         }
     }
 
@@ -84,24 +57,24 @@ namespace ServiceContracts.DTO
         /// <summary>
         /// An extension method to convert an object of Person class into PersonResponse class
         /// </summary>
-        /// <param name="person"></param>
-        /// <returns>PersonResponse</returns>
+        /// <param name="person">The Person object to convert</param>
+        /// /// <returns>Returns the converted PersonResponse object</returns>
         public static PersonResponse ToPersonResponse(this Person person)
         {
+            //person => convert => PersonResponse
             return new PersonResponse()
             {
                 PersonID = person.PersonID,
                 PersonName = person.PersonName,
                 Email = person.Email,
                 DateOfBirth = person.DateOfBirth,
-                Gender = person.Gender,
-                CountryID = person.CountryID,
-                Address = person.Address,
                 ReceiveNewsLetters = person.ReceiveNewsLetters,
-                Age = (person.DateOfBirth != null) ? Math.Round((DateTime.Now - person.DateOfBirth.Value).TotalDays / 365.25) : null
+                Address = person.Address,
+                CountryID = person.CountryID,
+                Gender = person.Gender,
+                Age = (person.DateOfBirth != null) ? Math.Round((DateTime.Now - person.DateOfBirth.Value).TotalDays / 365.25) : null,
+                Country = person.Country?.CountryName
             };
         }
     }
-
-
 }
