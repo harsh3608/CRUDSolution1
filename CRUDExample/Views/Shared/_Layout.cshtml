@@ -5,17 +5,20 @@
     <meta name="viewport" content="width=device-width" />
     <title>@ViewBag.Title</title>
     <link href="~/Stylesheet.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
 </head>
 <body>
     <div class="container">
         <div class="navbar">
             <div class="navbar-brand">
-                <img src="~/logo.png" width="60px" height="40px" asp-append-version="true" />
+                <img src="~/logo.png" width="30px" asp-append-version="true" />
             </div>
             <ul>
                 <li>
-                    <a href="~/persons/index">Persons</a>
+                    <a asp-controller="Persons" asp-action="Index">Persons</a>
+                    <a asp-controller="Countries" asp-action="UploadFromExcel">Upload Countries</a>
                 </li>
             </ul>
         </div>
