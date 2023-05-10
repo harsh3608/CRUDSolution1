@@ -5,14 +5,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Entities
 {
-    public class PersonsDbContext : DbContext
+    public class ApplicationDbContext : DbContext
     {
-        public PersonsDbContext(DbContextOptions options) : base(options)
+        public ApplicationDbContext(DbContextOptions options) : base(options)
         {
         }
 
-        public DbSet<Country> Countries { get; set; }
-        public DbSet<Person> Persons { get; set; }
+        public virtual DbSet<Country> Countries { get; set; }
+        public virtual DbSet<Person> Persons { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -53,8 +53,8 @@ namespace Entities
             modelBuilder.Entity<Person>(entity =>
             {
                 entity.HasOne<Country>(c => c.Country)
-                .WithMany(p => p.People)
-                .HasForeignKey(p => p.CountryID);
+                   .WithMany(p => p.People)
+                   .HasForeignKey(p => p.CountryID);
             });
         }
 
@@ -66,15 +66,15 @@ namespace Entities
         public int sp_InsertPerson(Person person)
         {
             SqlParameter[] parameters = new SqlParameter[] {
-        new SqlParameter("@PersonID", person.PersonID),
-        new SqlParameter("@PersonName", person.PersonName),
-        new SqlParameter("@Email", person.Email),
-        new SqlParameter("@DateOfBirth", person.DateOfBirth),
-        new SqlParameter("@Gender", person.Gender),
-        new SqlParameter("@CountryID", person.CountryID),
-        new SqlParameter("@Address", person.Address),
-        new SqlParameter("@ReceiveNewsLetters", person.ReceiveNewsLetters)
-      };
+                new SqlParameter("@PersonID", person.PersonID),
+                new SqlParameter("@PersonName", person.PersonName),
+                new SqlParameter("@Email", person.Email),
+                new SqlParameter("@DateOfBirth", person.DateOfBirth),
+                new SqlParameter("@Gender", person.Gender),
+                new SqlParameter("@CountryID", person.CountryID),
+                new SqlParameter("@Address", person.Address),
+                new SqlParameter("@ReceiveNewsLetters", person.ReceiveNewsLetters)
+            };
 
             return Database.ExecuteSqlRaw("EXECUTE [dbo].[InsertPerson] @PersonID, @PersonName, @Email, @DateOfBirth, @Gender, @CountryID, @Address, @ReceiveNewsLetters", parameters);
         }
