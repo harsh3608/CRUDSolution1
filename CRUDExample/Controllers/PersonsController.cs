@@ -4,6 +4,7 @@ using Rotativa.AspNetCore;
 using ServiceContracts;
 using ServiceContracts.DTO;
 using ServiceContracts.Enums;
+using System.IO;
 
 namespace CRUDExample.Controllers
 {
@@ -13,12 +14,14 @@ namespace CRUDExample.Controllers
         //private fields
         private readonly IPersonsService _personsService;
         private readonly ICountriesService _countriesService;
+        private readonly ILogger<PersonsController> _logger;
 
         //constructor
-        public PersonsController(IPersonsService personsService, ICountriesService countriesService)
+        public PersonsController(IPersonsService personsService, ICountriesService countriesService, ILogger<PersonsController> logger)
         {
             _personsService = personsService;
             _countriesService = countriesService;
+            _logger = logger;
         }
 
         //Url: persons/index
@@ -26,6 +29,10 @@ namespace CRUDExample.Controllers
         [Route("/")]
         public async Task<IActionResult> Index(string searchBy, string? searchString, string sortBy = nameof(PersonResponse.PersonName), SortOrderOptions sortOrder = SortOrderOptions.ASC)
         {
+            _logger.LogInformation("Index action method of PersonsController");
+
+            _logger.LogDebug($"searchBy: {searchBy}, searchString: {searchString}, sortBy: {sortBy}, sortOrder: {sortOrder}");
+
             //Search
             ViewBag.SearchFields = new Dictionary<string, string>()
       {
@@ -67,6 +74,7 @@ namespace CRUDExample.Controllers
             return View();
         }
 
+
         [HttpPost]
         //Url: persons/create
         [Route("[action]")]
@@ -79,7 +87,7 @@ namespace CRUDExample.Controllers
                 new SelectListItem() { Text = temp.CountryName, Value = temp.CountryID.ToString() });
 
                 ViewBag.Errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                return View();
+                return View(personAddRequest);
             }
 
             //call the service method
@@ -164,20 +172,14 @@ namespace CRUDExample.Controllers
         [Route("PersonsPDF")]
         public async Task<IActionResult> PersonsPDF()
         {
-            //Get List of Persons
+            //Get list of persons
             List<PersonResponse> persons = await _personsService.GetAllPersons();
 
-            //Return View as PDF
+            //Return view as pdf
             return new ViewAsPdf("PersonsPDF", persons, ViewData)
             {
-                PageMargins = new Rotativa.AspNetCore.Options.Margins()
-                {
-                    Top = 20,
-                    Right = 20,
-                    Bottom = 20,
-                    Left = 20,
-                },
-                PageOrientation = Rotativa.AspNetCore.Options.Orientation.Portrait
+                PageMargins = new Rotativa.AspNetCore.Options.Margins() { Top = 20, Right = 20, Bottom = 20, Left = 20 },
+                PageOrientation = Rotativa.AspNetCore.Options.Orientation.Landscape
             };
         }
 
@@ -186,7 +188,6 @@ namespace CRUDExample.Controllers
         public async Task<IActionResult> PersonsCSV()
         {
             MemoryStream memoryStream = await _personsService.GetPersonsCSV();
-
             return File(memoryStream, "application/octet-stream", "persons.csv");
         }
 
