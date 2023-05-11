@@ -18,6 +18,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="MSTest.TestFramework" Version="3.0.2" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="7.0.0" />
+    <PackageReference Include="SerilogTimings" Version="3.0.1" />
     <PackageReference Include="xunit.extensibility.core" Version="2.4.2" />
   </ItemGroup>
 
