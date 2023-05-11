@@ -15,7 +15,6 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using SerilogTimings;
 
-
 namespace Services
 {
     public class PersonsService : IPersonsService
