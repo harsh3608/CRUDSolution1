@@ -1,4 +1,7 @@
 ﻿using CRUDExample.Filters.ActionFilters;
+using CRUDExample.Filters.AuthorizationFilter;
+using CRUDExample.Filters.ExceptionFilters;
+using CRUDExample.Filters.ResourceFilters;
 using CRUDExample.Filters.ResultFilters;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -11,6 +14,7 @@ namespace CRUDExample.Controllers
 {
     [Route("[controller]")]
     [TypeFilter(typeof(ResponseHeaderActionFilter), Arguments = new object[] { "My-Key-From-Controller", "My-Value-From-Controller", 3 }, Order = 3)]
+    [TypeFilter(typeof(HandleExceptionFilter))]
     public class PersonsController : Controller
     {
         //private fields
@@ -72,6 +76,7 @@ namespace CRUDExample.Controllers
         //Url: persons/create
         [Route("[action]")]
         [TypeFilter(typeof(PersonCreateAndEditPostActionFilter))]
+        [TypeFilter(typeof(FeatureDisabledResourceFilter), Arguments = new object[] { false })]
         public async Task<IActionResult> Create(PersonAddRequest personRequest)
         {
             //call the service method
@@ -84,6 +89,7 @@ namespace CRUDExample.Controllers
 
         [HttpGet]
         [Route("[action]/{personID}")] //Eg: /persons/edit/1
+                                       //[TypeFilter(typeof(TokenResultFilter))]
         public async Task<IActionResult> Edit(Guid personID)
         {
             PersonResponse? personResponse = await _personsService.GetPersonByPersonID(personID);
@@ -105,6 +111,8 @@ namespace CRUDExample.Controllers
         [HttpPost]
         [Route("[action]/{personID}")]
         [TypeFilter(typeof(PersonCreateAndEditPostActionFilter))]
+        [TypeFilter(typeof(TokenAuthorizationFilter))]
+        [TypeFilter(typeof(PersonAlwaysRunResultFilter))]
         public async Task<IActionResult> Edit(PersonUpdateRequest personRequest)
         {
             PersonResponse? personResponse = await _personsService.GetPersonByPersonID(personRequest.PersonID);
